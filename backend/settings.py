@@ -88,11 +88,31 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', f'sqlite:///{str(BASE_DIR / "db.sqlite3")}')
-    )
-}
+# في Production: Railway سيقوم تلقائياً بإنشاء DATABASE_URL عند إضافة PostgreSQL
+# في Development: سيعمل مع SQLite (الافتراضي)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Production: استخدام PostgreSQL من Railway
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,  # إعادة استخدام الاتصال لمدة 10 دقائق
+            conn_health_checks=True,  # فحص صحة الاتصال
+        )
+    }
+else:
+    # Development: استخدام SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    
+    # تحذير في Development
+    if DEBUG:
+        print("⚠️  Warning: Using SQLite database. For production, use PostgreSQL!")
 
 
 # Password validation
