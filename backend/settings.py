@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise must be first (except SecurityMiddleware)
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS middleware (must be before CommonMiddleware)
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -149,8 +150,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # For production - where collectstatic will gather files
+
+# WhiteNoise configuration for serving static files in production
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -204,14 +208,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:4200",
+    "https://e-backend-production-0a0c.up.railway.app",  # Railway production URL
 ]
 
 # For development only - allows all origins (remove in production!)
-# السماح بالنطاق الخاص بالـ production
+CORS_ALLOW_ALL_ORIGINS = True  # Set to False in production
+
+# CSRF Trusted Origins for Railway production
 CSRF_TRUSTED_ORIGINS = [
     "https://e-backend-production-0a0c.up.railway.app",
 ]
-  # Set to False in production
 
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
