@@ -112,7 +112,7 @@ else:
     
     # تحذير في Development
     if DEBUG:
-        print("⚠️  Warning: Using SQLite database. For production, use PostgreSQL!")
+        print("Warning: Using SQLite database. For production, use PostgreSQL!")
 
 
 # Password validation
@@ -207,7 +207,11 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # For development only - allows all origins (remove in production!)
-CORS_ALLOW_ALL_ORIGINS = True  # Set to False in production
+# السماح بالنطاق الخاص بالـ production
+CSRF_TRUSTED_ORIGINS = [
+    "https://e-backend-production-0a0c.up.railway.app",
+]
+  # Set to False in production
 
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
