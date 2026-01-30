@@ -217,11 +217,15 @@ CORS_ALLOW_ALL_ORIGINS = True  # Set to False in production
 
 # CSRF Trusted Origins for Railway production
 # يجب إضافة جميع الـ origins التي ستستخدمها
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='https://e-backend-production-0a0c.up.railway.app,https://*.railway.app',
-    cast=Csv()
-)
+CSRF_TRUSTED_ORIGINS_STR = config('CSRF_TRUSTED_ORIGINS', default='')
+if CSRF_TRUSTED_ORIGINS_STR:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_STR.split(',') if origin.strip()]
+else:
+    # Default values if not set in environment
+    CSRF_TRUSTED_ORIGINS = [
+        'https://e-backend-production-0a0c.up.railway.app',
+        'https://*.railway.app',
+    ]
 
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
