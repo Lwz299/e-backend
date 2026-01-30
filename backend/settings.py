@@ -23,12 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-4-ni-p+y*w8$-p&_$aw-qkl)4ighflq33o+)4do090@v_9tdv2')
+# SECRET_KEY is required in production - must be set in Railway environment variables
+SECRET_KEY = config('SECRET_KEY', default='change-me-in-production-railway')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+# DEBUG must be False in production - set in Railway environment variables
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
+# ALLOWED_HOSTS must be set in Railway environment variables
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='e-backend-production-0a2d.up.railway.app,*.railway.app', cast=Csv())
 
 
 # Application definition
@@ -90,12 +93,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# في Production: Railway سيقوم تلقائياً بإنشاء DATABASE_URL عند إضافة PostgreSQL
-# في Development: سيعمل مع SQLite (الافتراضي)
-DATABASE_URL = config('DATABASE_URL', default=None)
+# Production: Railway PostgreSQL - DATABASE_URL is required
+# Railway automatically provides DATABASE_URL from PostgreSQL service
+DATABASE_URL = config('DATABASE_URL', default='')
 
 if DATABASE_URL:
-    # Production: استخدام PostgreSQL من Railway
+    # Use PostgreSQL from Railway
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -104,17 +107,7 @@ if DATABASE_URL:
         )
     }
 else:
-    # Development: استخدام SQLite
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-    
-    # تحذير في Development
-    if DEBUG:
-        print("Warning: Using SQLite database. For production, use PostgreSQL!")
+    raise ValueError("DATABASE_URL environment variable is required for production!")
 
 
 # Password validation
@@ -201,30 +194,28 @@ SIMPLE_JWT = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# CORS Configuration - Allow frontend to access API
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React default
-    "http://localhost:5173",  # Vite default
-    "http://localhost:4200",  # Angular default
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:4200",
-    "https://e-backend-production-0a0c.up.railway.app",  # Railway production URL
-]
+# CORS Configuration - Production settings
+# Get CORS allowed origins from environment variable
+CORS_ALLOWED_ORIGINS_STR = config('CORS_ALLOWED_ORIGINS', default='')
+if CORS_ALLOWED_ORIGINS_STR:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_STR.split(',') if origin.strip()]
+else:
+    # Default: only Railway production URL
+    CORS_ALLOWED_ORIGINS = [
+        'https://e-backend-production-0a2d.up.railway.app',
+    ]
 
-# For development only - allows all origins (remove in production!)
-CORS_ALLOW_ALL_ORIGINS = True  # Set to False in production
+# Production: Do not allow all origins
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
 # CSRF Trusted Origins for Railway production
-# يجب إضافة جميع الـ origins التي ستستخدمها
 CSRF_TRUSTED_ORIGINS_STR = config('CSRF_TRUSTED_ORIGINS', default='')
 if CSRF_TRUSTED_ORIGINS_STR:
     CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_STR.split(',') if origin.strip()]
 else:
-    # Default values if not set in environment
+    # Default: Railway production URL
     CSRF_TRUSTED_ORIGINS = [
-        'https://e-backend-production-0a0c.up.railway.app',
-        'https://*.railway.app',
+        'https://e-backend-production-0a2d.up.railway.app',
     ]
 
 # CORS settings
