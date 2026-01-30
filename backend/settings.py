@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4-ni-p+y*w8$-p&_$aw-qkl)4ighflq33o+)4do090@v_9tdv2'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-4-ni-p+y*w8$-p&_$aw-qkl)4ighflq33o+)4do090@v_9tdv2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']  # مؤقت للاختبار - يجب تحديد الـ hosts في production
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
 
 # Application definition
@@ -91,7 +92,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # في Production: Railway سيقوم تلقائياً بإنشاء DATABASE_URL عند إضافة PostgreSQL
 # في Development: سيعمل مع SQLite (الافتراضي)
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = config('DATABASE_URL', default=None)
 
 if DATABASE_URL:
     # Production: استخدام PostgreSQL من Railway
